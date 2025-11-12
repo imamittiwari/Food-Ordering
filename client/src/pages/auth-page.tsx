@@ -60,7 +60,7 @@ export default function AuthPage() {
   }
   
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
       <div className="max-w-5xl w-full grid gap-6 md:grid-cols-2 items-center">
         <div className="bg-primary text-white p-8 rounded-lg hidden md:block">
           <div className="space-y-4">

@@ -92,6 +92,9 @@ export class MemStorage implements IStorage {
     
     // Seed with some menu items
     this.seedMenuItems();
+
+    // Update some menu items with enhanced features
+    this.updateMenuItemsWithEnhancedFeatures();
   }
 
   // User methods
@@ -107,7 +110,14 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const user: User = { id, ...insertUser };
+    const user: User = {
+      id,
+      username: insertUser.username,
+      password: insertUser.password,
+      name: insertUser.name || null,
+      email: insertUser.email || null,
+      isAdmin: insertUser.isAdmin || false
+    };
     this.users.set(id, user);
     return user;
   }
@@ -129,7 +139,25 @@ export class MemStorage implements IStorage {
 
   async createMenuItem(insertMenuItem: InsertMenuItem): Promise<MenuItem> {
     const id = this.menuItemIdCounter++;
-    const menuItem: MenuItem = { id, ...insertMenuItem, rating: 0 };
+    const menuItem: MenuItem = {
+      id,
+      name: insertMenuItem.name,
+      description: insertMenuItem.description,
+      price: insertMenuItem.price,
+      imageUrl: insertMenuItem.imageUrl || null,
+      category: insertMenuItem.category,
+      rating: 0,
+      reviewCount: 0,
+      isPopular: insertMenuItem.isPopular || false,
+      isSeasonal: false,
+      isCombo: false,
+      dietaryPreferences: null,
+      nutritionalInfo: null,
+      availableAddons: null,
+      comboItems: null,
+      discountPercentage: 0,
+      createdAt: new Date()
+    };
     this.menuItems.set(id, menuItem);
     return menuItem;
   }
@@ -176,19 +204,26 @@ export class MemStorage implements IStorage {
     const existingCartItem = Array.from(this.cartItems.values()).find(
       (item) => item.userId === insertCartItem.userId && item.menuItemId === insertCartItem.menuItemId
     );
-    
+
     if (existingCartItem) {
       // Increment quantity of existing item
       return this.updateCartItemQuantity(
-        existingCartItem.id, 
-        insertCartItem.userId, 
-        existingCartItem.quantity + insertCartItem.quantity
+        existingCartItem.id,
+        insertCartItem.userId,
+        existingCartItem.quantity + (insertCartItem.quantity || 1)
       ) as Promise<CartItem>;
     }
-    
+
     // Otherwise, add as a new item
     const id = this.cartItemIdCounter++;
-    const cartItem: CartItem = { id, ...insertCartItem };
+    const cartItem: CartItem = {
+      id,
+      userId: insertCartItem.userId,
+      menuItemId: insertCartItem.menuItemId,
+      quantity: insertCartItem.quantity || 1,
+      selectedAddons: null,
+      specialInstructions: null
+    };
     this.cartItems.set(id, cartItem);
     return cartItem;
   }
@@ -224,13 +259,17 @@ export class MemStorage implements IStorage {
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = this.orderIdCounter++;
     const now = new Date();
-    const order: Order = { 
-      id, 
-      ...insertOrder, 
+    const order: Order = {
+      id,
+      userId: insertOrder.userId,
+      items: insertOrder.items,
+      status: 'pending',
+      total: insertOrder.total,
       createdAt: now,
-      status: 'pending'
+      address: insertOrder.address || null,
+      paymentId: insertOrder.paymentId || null
     };
-    
+
     this.orders.set(id, order);
     return order;
   }
@@ -350,9 +389,67 @@ export class MemStorage implements IStorage {
         isPopular: false
       }
     ];
-    
+
     for (const item of menuItemsData) {
       await this.createMenuItem(item);
+    }
+  }
+
+  // Update menu items with enhanced features for demo
+  private async updateMenuItemsWithEnhancedFeatures() {
+    const menuItems = Array.from(this.menuItems.values());
+
+    // Update some items with dietary preferences and nutritional info
+    const updates = [
+      {
+        id: 1, // Pepperoni Pizza
+        dietaryPreferences: ["vegetarian"],
+        nutritionalInfo: { calories: 850, protein: 35, carbs: 80, fat: 40, allergens: ["dairy", "gluten"] }
+      },
+      {
+        id: 2, // Deluxe Burger
+        nutritionalInfo: { calories: 650, protein: 45, carbs: 50, fat: 35, allergens: ["gluten"] }
+      },
+      {
+        id: 3, // Salmon Sushi Roll
+        dietaryPreferences: ["gluten-free"],
+        nutritionalInfo: { calories: 320, protein: 25, carbs: 45, fat: 12, allergens: ["fish"] }
+      },
+      {
+        id: 4, // Pasta Carbonara
+        nutritionalInfo: { calories: 720, protein: 28, carbs: 65, fat: 38, allergens: ["dairy", "gluten", "eggs"] }
+      },
+      {
+        id: 5, // Margherita Pizza
+        dietaryPreferences: ["vegetarian"],
+        nutritionalInfo: { calories: 780, protein: 32, carbs: 75, fat: 35, allergens: ["dairy", "gluten"] }
+      },
+      {
+        id: 6, // Chicken Salad
+        dietaryPreferences: ["gluten-free"],
+        nutritionalInfo: { calories: 420, protein: 35, carbs: 25, fat: 22, allergens: [] }
+      },
+      {
+        id: 7, // Spicy Wings
+        nutritionalInfo: { calories: 580, protein: 42, carbs: 15, fat: 38, allergens: [] }
+      },
+      {
+        id: 8, // Chocolate Cake
+        dietaryPreferences: ["vegetarian"],
+        nutritionalInfo: { calories: 450, protein: 6, carbs: 55, fat: 25, allergens: ["dairy", "gluten", "eggs"] }
+      }
+    ];
+
+    for (const update of updates) {
+      const item = menuItems.find(m => m.id === update.id);
+      if (item) {
+        const updatedItem: MenuItem = {
+          ...item,
+          dietaryPreferences: update.dietaryPreferences || null,
+          nutritionalInfo: update.nutritionalInfo || null
+        };
+        this.menuItems.set(item.id, updatedItem);
+      }
     }
   }
 }
@@ -361,5 +458,5 @@ export class MemStorage implements IStorage {
 import { MongoStorage } from './mongo-storage';
 
 // Choose which storage implementation to use
-// export const storage = new MemStorage(); // In-memory storage
-export const storage = new MongoStorage(); // MongoDB storage
+export const storage = new MemStorage(); // In-memory storage
+// export const storage = new MongoStorage(); // MongoDB storage

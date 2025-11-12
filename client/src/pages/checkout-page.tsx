@@ -56,24 +56,24 @@ export default function CheckoutPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
-      <main className="flex-grow bg-neutral-50">
+      <main className="flex-grow bg-muted/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-8">Checkout</h1>
-          
+          <h1 className="text-3xl font-bold text-foreground mb-8">Checkout</h1>
+
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
           ) : clientSecret ? (
             <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <CheckoutForm 
-                clientSecret={clientSecret} 
-                onSuccess={handleCheckoutSuccess} 
+              <CheckoutForm
+                clientSecret={clientSecret}
+                onSuccess={handleCheckoutSuccess}
               />
             </Elements>
           ) : (
             <div className="text-center py-12">
-              <h2 className="text-xl font-medium text-neutral-800">
+              <h2 className="text-xl font-medium text-muted-foreground">
                 Unable to initialize payment. Please try again later.
               </h2>
             </div>

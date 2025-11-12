@@ -8,7 +8,9 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/food-o
 // Connect to MongoDB
 export const connectToDatabase = async () => {
   try {
-    const conn = await mongoose.connect(MONGODB_URI);
+    const conn = await mongoose.connect(MONGODB_URI, {
+      ssl: true
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {

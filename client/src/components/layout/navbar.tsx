@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/context/cart-context";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import logo from "../../logoo.svg";
-import { 
+import {
   Search,
   ShoppingCart,
   Menu,
   User as UserIcon,
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 import { 
   DropdownMenu,
@@ -32,6 +33,7 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, logoutMutation } = useAuth();
   const { items, toggleCart } = useCart();
+  const [, navigate] = useLocation();
   
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
   
@@ -45,7 +47,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-background border-b shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Desktop Navigation */}
@@ -56,21 +58,19 @@ export function Navbar() {
               </Link>
             </div>
             <div className="hidden sm:flex sm:ml-6 sm:space-x-8 items-center">
-
-
               <Link href="/">
-                <a className="border-primary text-neutral-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a className="border-primary text-foreground inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                   Menu
                 </a>
               </Link>
               <Link href="/orders">
-                <a className="border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-800 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                <a className="border-transparent text-muted-foreground hover:border-border hover:text-foreground inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                   Orders
                 </a>
               </Link>
               {user?.isAdmin && (
                 <Link href="/admin/menu">
-                  <a className="border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-800 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  <a className="border-transparent text-muted-foreground hover:border-border hover:text-foreground inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                     Admin
                   </a>
                 </Link>
@@ -84,30 +84,74 @@ export function Navbar() {
               <Input
                 type="text"
                 placeholder="Search menu..."
-                className="w-64 pl-10"
+                className={`w-64 transition-all duration-200 ${
+                  searchQuery
+                    ? 'pl-10 pr-8 ring-2 ring-primary/20 border-primary/50'
+                    : 'pl-10'
+                }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (searchQuery.trim()) {
+                      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+                      setSearchQuery(""); // Clear the input after navigation
+                    } else {
+                      navigate('/');
+                      setSearchQuery("");
+                    }
+                  }
+                }}
               />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-neutral-500" />
+              <button
+                onClick={() => {
+                  if (searchQuery.trim()) {
+                    navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchQuery(""); // Clear the input after navigation
+                  } else {
+                    navigate('/');
+                    setSearchQuery("");
+                  }
+                }}
+                className={`absolute left-3 top-2.5 h-5 w-5 transition-colors ${
+                  searchQuery
+                    ? 'text-primary hover:text-primary/80'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Search className="h-5 w-5" />
+              </button>
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    navigate('/');
+                  }}
+                  className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground hover:text-destructive transition-colors"
+                  title="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            
+
             <ThemeToggle />
             <button
               onClick={toggleCart}
-              className="p-2 text-neutral-600 hover:text-neutral-900 relative mr-3"
+              className="p-2 text-muted-foreground hover:text-foreground relative mr-3"
               aria-label="Shopping cart"
             >
               <ShoppingCart className="h-6 w-6" />
               {cartItemsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemsCount}
                 </span>
               )}
             </button>
-            
+
             {user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center text-sm font-medium text-neutral-700 hover:text-neutral-900 focus:outline-none">
+                <DropdownMenuTrigger className="flex items-center text-sm font-medium text-foreground hover:text-foreground focus:outline-none">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{getInitials(user.name || user.username)}</AvatarFallback>
                   </Avatar>
@@ -137,7 +181,7 @@ export function Navbar() {
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="text-red-500 cursor-pointer"
+                    className="text-destructive cursor-pointer"
                     onClick={() => logoutMutation.mutate()}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
@@ -157,23 +201,23 @@ export function Navbar() {
             {user && (
               <button
                 onClick={toggleCart}
-                className="p-2 text-neutral-600 hover:text-neutral-900 relative mr-2"
+                className="p-2 text-muted-foreground hover:text-foreground relative mr-2"
                 aria-label="Shopping cart"
               >
                 <ShoppingCart className="h-6 w-6" />
                 {cartItemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {cartItemsCount}
                   </span>
                 )}
               </button>
             )}
-            
+
             <Sheet>
               <SheetTrigger asChild>
-                <button 
-                  type="button" 
-                  className="inline-flex items-center justify-center p-2 rounded-md text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 focus:outline-none"
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none"
                   aria-label="Open menu"
                 >
                   <Menu className="h-6 w-6" />
@@ -181,7 +225,7 @@ export function Navbar() {
               </SheetTrigger>
               <SheetContent side="right">
                 <div className="flex flex-col h-full">
-                  <div className="pt-4 pb-3 border-b border-neutral-200">
+                  <div className="pt-4 pb-3 border-b border-border">
                     {user ? (
                       <div className="flex items-center px-4">
                         <div className="flex-shrink-0">
@@ -190,59 +234,59 @@ export function Navbar() {
                           </Avatar>
                         </div>
                         <div className="ml-3">
-                          <div className="text-base font-medium text-neutral-800">{user.name || user.username}</div>
+                          <div className="text-base font-medium text-foreground">{user.name || user.username}</div>
                           {user.email && (
-                            <div className="text-sm font-medium text-neutral-500">{user.email}</div>
+                            <div className="text-sm font-medium text-muted-foreground">{user.email}</div>
                           )}
                         </div>
                       </div>
                     ) : (
                       <div className="px-4">
                         <Link href="/auth">
-                          <a className="block text-center w-full py-2 bg-primary text-white rounded-md font-medium">
+                          <a className="block text-center w-full py-2 bg-primary text-primary-foreground rounded-md font-medium">
                             Login / Register
                           </a>
                         </Link>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="px-2 py-3 space-y-1">
                     <Link href="/">
-                      <a className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100">
+                      <a className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent">
                         Menu
                       </a>
                     </Link>
-                    
+
                     {user && (
                       <Link href="/orders">
-                        <a className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100">
+                        <a className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent">
                           Orders
                         </a>
                       </Link>
                     )}
-                    
+
                     {user?.isAdmin && (
                       <>
                         <Link href="/admin/menu">
-                          <a className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100">
+                          <a className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent">
                             Manage Menu
                           </a>
                         </Link>
                         <Link href="/admin/orders">
-                          <a className="block px-3 py-2 rounded-md text-base font-medium text-neutral-700 hover:bg-neutral-100">
+                          <a className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent">
                             Manage Orders
                           </a>
                         </Link>
                       </>
                     )}
                   </div>
-                  
+
                   {user && (
-                    <div className="mt-auto border-t border-neutral-200 pt-4 pb-3">
+                    <div className="mt-auto border-t border-border pt-4 pb-3">
                       <button
                         onClick={() => logoutMutation.mutate()}
-                        className="flex items-center px-4 py-2 text-base font-medium text-red-500 hover:bg-red-50 hover:text-red-700 w-full"
+                        className="flex items-center px-4 py-2 text-base font-medium text-destructive hover:bg-destructive/10 w-full"
                       >
                         <LogOut className="h-5 w-5 mr-3" />
                         Logout

@@ -210,29 +210,29 @@ export function CheckoutForm({ clientSecret, onSuccess }: CheckoutFormProps) {
                 <div className="space-y-1">
                   {items.map((item: CartItemWithDetails) => (
                     <div key={item.id} className="flex justify-between text-sm py-1">
-                      <span className="text-neutral-600">
+                      <span className="text-muted-foreground">
                         {item.menuItem.name} x{item.quantity}
                       </span>
                       <Price value={item.menuItem.price * item.quantity} size="sm" />
                     </div>
                   ))}
-                </div>
-                
+
                 <Separator className="my-4" />
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Subtotal</span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <Price value={subtotal} />
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-600">Delivery Fee</span>
+                    <span className="text-muted-foreground">Delivery Fee</span>
                     <Price value={deliveryFee} />
                   </div>
                   <div className="flex justify-between font-medium">
                     <span>Total</span>
                     <Price value={total} className="font-medium" />
                   </div>
+                </div>
                 </div>
               </CardContent>
               <CardFooter>
@@ -247,7 +247,7 @@ export function CheckoutForm({ clientSecret, onSuccess }: CheckoutFormProps) {
                       Processing...
                     </>
                   ) : (
-                    `Pay ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}`
+                    `Pay ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(total)}`
                   )}
                 </Button>
               </CardFooter>

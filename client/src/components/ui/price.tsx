@@ -7,9 +7,9 @@ interface PriceProps {
 }
 
 export function Price({ value, className, size = "md" }: PriceProps) {
-  const formattedPrice = new Intl.NumberFormat("en-US", {
+  const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
     minimumFractionDigits: 2
   }).format(value);
   

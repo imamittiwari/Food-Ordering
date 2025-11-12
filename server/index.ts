@@ -42,12 +42,8 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Connect to MongoDB
-    await connectToDatabase();
-    log('MongoDB connected successfully');
-    
-    // Seed initial data if needed
-    await (storage as any).seedInitialData();
+    // Database connection not needed for in-memory storage
+    log('Using in-memory storage');
     
     const server = await registerRoutes(app);
 

@@ -22,12 +22,12 @@ export default function OrderSuccessPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       
-      <main className="flex-grow bg-neutral-50 flex items-center justify-center p-4">
+      <main className="flex-grow bg-muted/50 flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-green-100 p-3 rounded-full">
-                <CheckCircle className="h-12 w-12 text-green-600" />
+              <div className="bg-green-100 dark:bg-green-900/20 p-3 rounded-full">
+                <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <CardTitle className="text-2xl">Order Placed Successfully!</CardTitle>
@@ -35,22 +35,22 @@ export default function OrderSuccessPage() {
               Your order #{orderId} has been placed successfully. You can track your order in the Orders section.
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
-            <div className="bg-neutral-50 p-4 rounded-md border border-neutral-200 text-left">
-              <h3 className="font-medium text-neutral-900 mb-2">Order Details</h3>
+            <div className="bg-muted/50 p-4 rounded-md border border-border text-left">
+              <h3 className="font-medium text-card-foreground mb-2">Order Details</h3>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-600">Order Number:</span>
-                  <span className="text-neutral-900 font-medium">#{orderId}</span>
+                  <span className="text-muted-foreground">Order Number:</span>
+                  <span className="text-card-foreground font-medium">#{orderId}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-600">Estimated Delivery:</span>
-                  <span className="text-neutral-900 font-medium">30-45 minutes</span>
+                  <span className="text-muted-foreground">Estimated Delivery:</span>
+                  <span className="text-card-foreground font-medium">30-45 minutes</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-600">Payment Method:</span>
-                  <span className="text-neutral-900 font-medium">Credit Card</span>
+                  <span className="text-muted-foreground">Payment Method:</span>
+                  <span className="text-card-foreground font-medium">Credit Card</span>
                 </div>
               </div>
             </div>

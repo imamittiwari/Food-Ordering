@@ -21,7 +21,16 @@ export const menuItems = pgTable("menu_items", {
   imageUrl: text("image_url"),
   category: text("category").notNull(),
   rating: doublePrecision("rating").default(0),
+  reviewCount: integer("review_count").default(0),
   isPopular: boolean("is_popular").default(false),
+  isSeasonal: boolean("is_seasonal").default(false),
+  isCombo: boolean("is_combo").default(false),
+  dietaryPreferences: jsonb("dietary_preferences"), // ["vegetarian", "vegan", "gluten-free", etc.]
+  nutritionalInfo: jsonb("nutritional_info"), // {calories, protein, carbs, fat, allergens, ingredients}
+  availableAddons: jsonb("available_addons"), // [{name, price, category}]
+  comboItems: jsonb("combo_items"), // For combo meals: [{menuItemId, quantity, discount}]
+  discountPercentage: doublePrecision("discount_percentage").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Orders Table
@@ -42,6 +51,28 @@ export const cartItems = pgTable("cart_items", {
   userId: integer("user_id").notNull(),
   menuItemId: integer("menu_item_id").notNull(),
   quantity: integer("quantity").notNull().default(1),
+  selectedAddons: jsonb("selected_addons"), // Selected add-ons for customization
+  specialInstructions: text("special_instructions"), // Special preparation instructions
+});
+
+// Reviews Table
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  menuItemId: integer("menu_item_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User Preferences Table (for AI recommendations)
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  preferredCategories: jsonb("preferred_categories"), // ["pizza", "burgers", etc.]
+  dietaryRestrictions: jsonb("dietary_restrictions"), // ["vegetarian", "gluten-free", etc.]
+  favoriteItems: jsonb("favorite_items"), // [menuItemId1, menuItemId2, etc.]
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Insert schemas
