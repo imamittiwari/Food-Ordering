@@ -50,7 +50,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Menu routes
   app.get("/api/menu", async (req, res) => {
     try {
-      const menuItems = await storage.getAllMenuItems();
+      const { search, category } = req.query;
+
+      let menuItems = await storage.getAllMenuItems();
+
+      // Filter by category if specified
+      if (category && category !== 'all') {
+        menuItems = menuItems.filter(item =>
+          item.category.toLowerCase() === (category as string).toLowerCase()
+        );
+      }
+
+      // Filter by search query if specified
+      if (search && search.trim()) {
+        const searchTerm = search.toString().toLowerCase().trim();
+        menuItems = menuItems.filter(item =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.category.toLowerCase().includes(searchTerm)
+        );
+      }
+
       res.json(menuItems);
     } catch (error) {
       res.status(500).json({ message: "Error fetching menu items" });

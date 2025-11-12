@@ -15,7 +15,16 @@ export default function HomePage() {
   const [searchParams] = useSearchParams();
 
   const { data: menuItems = [], isLoading } = useQuery<MenuItem[]>({
-    queryKey: ["/api/menu"],
+    queryKey: ["/api/menu", { search: searchQuery, category: selectedCategory }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (selectedCategory !== 'all') params.append('category', selectedCategory);
+
+      const response = await fetch(`/api/menu?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch menu items');
+      return response.json();
+    },
   });
 
   // Update search query from URL params
@@ -44,26 +53,11 @@ export default function HomePage() {
     name: category,
   }));
 
-  // Filter menu items by selected category and search query
-  const filteredItems = menuItems.filter((item) => {
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-    const matchesSearch = searchQuery === "" ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+  // Since filtering is now done server-side, menuItems is already filtered
+  const filteredItems = menuItems;
 
-    return matchesCategory && matchesSearch;
-  });
-
-  // Filter popular items (also respecting search)
-  const popularItems = menuItems.filter((item) => {
-    const isPopular = item.isPopular;
-    const matchesSearch = searchQuery === "" ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return isPopular && matchesSearch;
-  });
+  // Filter popular items from the filtered results
+  const popularItems = menuItems.filter((item) => item.isPopular);
   
   return (
     <div className="flex flex-col min-h-screen">

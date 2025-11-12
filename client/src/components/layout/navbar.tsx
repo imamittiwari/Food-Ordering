@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/context/cart-context";
+import { useDebounce } from "@/hooks/use-debounce";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import logo from "../../logoo.svg";
 import {
@@ -34,8 +35,20 @@ export function Navbar() {
   const { user, logoutMutation } = useAuth();
   const { items, toggleCart } = useCart();
   const [, navigate] = useLocation();
-  
+
+  // Debounce search query to avoid excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
+
+  // Update URL when debounced search query changes
+  useEffect(() => {
+    if (debouncedSearchQuery.trim()) {
+      navigate(`/?search=${encodeURIComponent(debouncedSearchQuery.trim())}`, { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [debouncedSearchQuery, navigate]);
   
   const getInitials = (name: string) => {
     return name
@@ -91,42 +104,15 @@ export function Navbar() {
                 }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    if (searchQuery.trim()) {
-                      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
-                      setSearchQuery(""); // Clear the input after navigation
-                    } else {
-                      navigate('/');
-                      setSearchQuery("");
-                    }
-                  }
-                }}
               />
-              <button
-                onClick={() => {
-                  if (searchQuery.trim()) {
-                    navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
-                    setSearchQuery(""); // Clear the input after navigation
-                  } else {
-                    navigate('/');
-                    setSearchQuery("");
-                  }
-                }}
-                className={`absolute left-3 top-2.5 h-5 w-5 transition-colors ${
-                  searchQuery
-                    ? 'text-primary hover:text-primary/80'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Search className="h-5 w-5" />
-              </button>
+              <Search className={`absolute left-3 top-2.5 h-5 w-5 transition-colors ${
+                searchQuery
+                  ? 'text-primary'
+                  : 'text-muted-foreground'
+              }`} />
               {searchQuery && (
                 <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    navigate('/');
-                  }}
+                  onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground hover:text-destructive transition-colors"
                   title="Clear search"
                 >
